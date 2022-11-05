@@ -119,12 +119,14 @@
             function view_element(event) {
                 const index = event.currentTarget.index;
                 console.log("view_element", index);
-                //window.location.href = "view.html";
             }
             function edit_element(event) {
-                const index = event.currentTarget.index;
-                console.log("edit_element", index);
-                //window.location.href = "edit.html";
+                try {
+                    const index = event.currentTarget.index;
+                    console.log("edit_element", index);
+                } catch(error) {
+                    console.log("edit_element");
+                }
             }
             function toggle_favorite_element(event) {
                 const index = event.currentTarget.index;
@@ -154,7 +156,7 @@
         <p>This is the homepage that shows the list of elements.</p>
         <p>Currently, when you open this page for the very first time, it will create and save three sample elements for texting.</p>
         <p>Press the following button to enter the edit page and add a new element.</p>
-        <button onclick="create_element()">create</button>
+        <button onclick="edit_element()">create</button>
         <p>The following textfield and buttons allow the user to search for elements in the list.</p>
         <p>The user can search for names (without #) and tags (with #) at the same time. For example:</p>
         <ul>
