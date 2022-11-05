@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <link rel="icon" href="data:,">
+        <script>
+            var search_keywords = "";
+            var show_only_the_favorited_elements = false;
+            const data_template = {
+                name: "",
+                tags: [],
+                favorited: false,
+                ingredients : "",
+                preparation : "",
+                notes : "",
+            }
+            if (window.localStorage.getItem("noshroom_element_id") === null) {
+                let sample_data0 = JSON.parse(JSON.stringify(data_template));
+                sample_data0.name = "mushroom killer";
+                sample_data0.tags = ["tag", "another tag", "the last tag"];
+                sample_data0.favorited = true;
+                sample_data0.ingredients = "some ingredients";
+                sample_data0.preparation = "some preparation";
+                sample_data0.notes = "some notes";
+                let sample_data1 = JSON.parse(JSON.stringify(data_template));
+                sample_data1.name = "mushroom terminator";
+                sample_data1.tags = ["tag"];
+                sample_data1.favorited = true;
+                sample_data1.ingredients = "some ingredients";
+                sample_data1.preparation = "some preparation";
+                sample_data1.notes = "some notes";
+                let sample_data2 = JSON.parse(JSON.stringify(data_template));
+                sample_data2.name = "mushroom slayer";
+                sample_data2.tags = ["another tag", "the last tag"];
+                sample_data2.favorited = false;
+                sample_data2.ingredients = "some ingredients";
+                sample_data2.preparation = "some preparation";
+                sample_data2.notes = "some notes";
+                window.localStorage.setItem("noshroom_element0", JSON.stringify(sample_data0));
+                window.localStorage.setItem("noshroom_element1", JSON.stringify(sample_data1));
+                window.localStorage.setItem("noshroom_element2", JSON.stringify(sample_data2));
+                window.localStorage.setItem("noshroom_element_id", 3);
+            }
+            if (window.localStorage.getItem("noshroom_element_id") === null) {
+                window.localStorage.setItem("noshroom_element_id", 0);
+            }
+            if (window.localStorage.getItem("noshroom_current_element_id") === null) {
+                window.localStorage.setItem("noshroom_current_element_id", 0);
+            }
+            function clear_and_construct_list() {
+                const children = document.getElementById("list").children;
+                var i = 0;
+                while (i < children.length) {
+                    if (children[i].id != "template") {
+                        document.getElementById("list").removeChild(children[i]);
+                    } else {
+                        i += 1;
+                    }
+                }
+                if (window.localStorage.getItem("noshroom_element_id") === null) {
+                    return;
+                }
+                const template = document.getElementById("template");
+                const search_array = search_keywords.trim().split("#");
+                for (var i = 0; i < search_array.length; i += 1) {
+                    search_array[i] = search_array[i].trim();
+                }
+                for (var i = 0; i < localStorage.getItem("element_id"); i += 1) {
+                    if (window.localStorage.getItem("noshroom_element" + i) === null) {
+                        continue;
+                    }
+                    let data = JSON.parse(window.localStorage.getItem("noshroom_element" + i));
+                    if (search_array.length > 0) {
+                        if (search_array[0]) {
+                            if (!data.name.toLowerCase().includes(search_array[0].toLowerCase())) {
+                                continue;
+                            }
+                        }
+                        var all_tags_found = true;
+                        for (var search_index = 1; search_index < search_array.length; search_index += 1) {
+                            var current_tag_found = false;
+                            if (search_array[search_index]) {
+                                for (const tag_index in data.tags) {
+                                    if (data.tags[tag_index] == search_array[search_index]) {
+                                        current_tag_found = true;
+                                        break;
+                                    }
+                                }
+                            }
+                            if (!current_tag_found) {
+                                all_tags_found = false;
+                                break;
+                            }
+                        }
+                        if (!all_tags_found) {
+                            continue;
+                        }
+                    }
+                    if (show_only_the_favorited_elements && !data.favorited) {
+                        continue;
+                    }
+                    let element = template.cloneNode(true);
+                    element.removeAttribute("hidden");
+                    element.setAttribute("id", "element" + i);
+                    element.querySelector("#name").innerHTML = "Name: " + data.name;
+                    element.querySelector("#tags").innerHTML = "Tags: ";
+                    for (const tag_index in data.tags) {
+                        element.querySelector("#tags").innerHTML += "#" + data.tags[tag_index] + " ";
+                    }
+                    element.querySelector("#view").addEventListener("click", view_element, false);
+                    element.querySelector("#view").index = i;
+                    element.querySelector("#edit").addEventListener("click", edit_element, false);
+                    element.querySelector("#edit").index = i;
+                    element.querySelector("#favorite").checked = data.favorited;
+                    element.querySelector("#favorite").addEventListener("change", toggle_favorite_element, false);
+                    element.querySelector("#favorite").index = i;
+                    document.getElementById("list").appendChild(element);
+                }
+            }
+            function view_element(event) {
+                const index = event.currentTarget.index;
+                console.log("view_element", index);
+                //window.location.href = "view.html";
+            }
+            function edit_element(event) {
+                const index = event.currentTarget.index;
+                console.log("edit_element", index);
+                //window.location.href = "edit.html";
+            }
+            function toggle_favorite_element(event) {
+                const index = event.currentTarget.index;
+                var data = JSON.parse(window.localStorage.getItem("noshroom_element" + index));
+                data.favorited = !data.favorited;
+                window.localStorage.setItem("noshroom_element" + index, JSON.stringify(data));
+            }
+            function search_element() {
+                search_keywords = document.getElementById("search").value;
+                clear_and_construct_list();
+            }
+            function clear_search() {
+                document.getElementById("search").value = "";
+                search_keywords = "";
+                clear_and_construct_list();
+            }
+            function toggle_show_favorited() {
+                show_only_the_favorited_elements = !show_only_the_favorited_elements;
+                clear_and_construct_list();
+            }
+            window.onload = clear_and_construct_list;
+        </script>
+    </head>
+    <body>
+        <h1>Homepage</h1>
+        <hr>
+        <p>This is the homepage that shows the list of elements.</p>
+        <p>Currently, when you open this page for the very first time, it will create and save three sample elements for texting.</p>
+        <p>Press the following button to enter the edit page and add a new element.</p>
+        <button onclick="create_element()">create</button>
+        <p>The following textfield and buttons allow the user to search for elements in the list.</p>
+        <p>The user can search for names (without #) and tags (with #) at the same time. For example:</p>
+        <ul>
+            <li>Searching "ab cd" shows elements with "ab cd" in their names.</li>
+            <li>Searching " ab  cd " shows elements with "ab  cd" in their names.</li>
+            <li>Searching "#abc #def" shows elements with tags "#abc" and "#def".</li>
+            <li>Searching " #ab cd # ef gh " shows elements with tags "#ab cd" and "#ef gh".</li>
+            <li>Searching " ab cd #ef " shows elements with "ab cd" in their names while having the "#ef" tag.</li>
+            <li>Searching is not case-sensitive, which means that "ab" and "AB" are the same.</li>
+        </ul>
+        <input type="text" id="search"/>
+        <button onclick="search_element()">search</button>
+        <button onclick="clear_search()">clear</button>
+        <p>The following checkbox allows the user to see only the favorited elements.</p>
+        <input type="checkbox" onclick="toggle_show_favorited()"/> shows only the favorited elements
+        <hr>
+        <ul id="list">
+            <li hidden id="template">
+                <p id="name"></p>
+                <p id="tags"></p>
+                <button id="view">view</button>
+                <button id="edit">edit</button>
+                <input type="checkbox" id="favorite"/> favorite
+            </li>
+        </ul>
+        <br>
+    </body>
+</html>
