@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <link rel="icon" href="data:,">
+            <script>
+                const data_template = {
+                    name: "",
+                    tags: [],
+                    favorited: false,
+                    ingredients : "",
+                    preparation : "",
+                    notes : "",
+                }
+                function construct_view_page() {
+                    if (window.localStorage.getItem("noshroom_element_id") === null) {
+                        enter_homepage();
+                    }
+                    const current_element_id = window.localStorage.getItem("noshroom_current_element_id");
+                    if (current_element_id === null) {
+                        enter_homepage();
+                    }
+                    if (current_element_id != -1) {
+                        let data = JSON.parse(window.localStorage.getItem("noshroom_element" + current_element_id));
+                        document.getElementById("name").value = data.name;
+                        document.getElementById("tags").value = "";
+                        for (const tag_index in data.tags) {
+                            document.getElementById("tags").value += "#" + data.tags[tag_index] + " ";
+                        }
+                        document.getElementById("tags").value = document.getElementById("tags").value.trim();
+                        document.getElementById("favorited").checked = data.favorited;
+                        preview_tags();
+                        document.getElementById("ingredients").value = data.ingredients;
+                        document.getElementById("preparation").value = data.preparation;
+                        document.getElementById("notes").value = data.notes;
+                    }
+                    document.getElementById("tags").removeEventListener("input", preview_tags);
+                    document.getElementById("tags").addEventListener("input", preview_tags);
+                }
+                function preview_tags() {
+                    const tags_array = document.getElementById("tags").value.trim().split("#");
+                    document.getElementById("tags_preview").innerHTML = "Tags preview: ";
+                    for (var i = 1; i < tags_array.length; i += 1) {
+                        tags_array[i] = tags_array[i].trim();
+                        if (tags_array[i]) {
+                            document.getElementById("tags_preview").innerHTML += "[" + tags_array[i] + "] ";
+                        }
+                    }
+                }
+                function toggle_favorite_element(event) {
+                    const current_element_id = window.localStorage.getItem("noshroom_current_element_id");
+                    if (current_element_id != -1) {
+                        var data = JSON.parse(window.localStorage.getItem("noshroom_element" + current_element_id));
+                        data.favorited = !data.favorited;
+                        window.localStorage.setItem("noshroom_element" + current_element_id, JSON.stringify(data));
+                    }
+                }
+                function delete_element_attempt() {
+                    document.getElementById("delete").setAttribute("disabled", "");
+                    document.getElementById("confirm").removeAttribute("disabled");
+                    document.getElementById("cancel").removeAttribute("disabled");
+                }
+                function delete_element_confirm() {
+                    const deletion_element_id = window.localStorage.getItem("noshroom_current_element_id");
+                    if (deletion_element_id != -1) {
+                        var index = 0;
+                        for (var i = 0; i < localStorage.getItem("noshroom_element_id"); i += 1) {
+                            if (window.localStorage.getItem("noshroom_element" + i) === null) {
+                                continue;
+                            }
+                            if (deletion_element_id == i) {
+                                window.localStorage.removeItem("noshroom_element" + i);
+                                continue;
+                            }
+                            let data = JSON.parse(window.localStorage.getItem("noshroom_element" + i));
+                            window.localStorage.setItem("noshroom_element" + index, JSON.stringify(data));
+                            index += 1;
+                        }
+                        window.localStorage.setItem("noshroom_element_id", index);
+                    }
+                    enter_homepage();
+                }
+                function delete_element_cancel() {
+                    document.getElementById("delete").removeAttribute("disabled");
+                    document.getElementById("confirm").setAttribute("disabled", "");
+                    document.getElementById("cancel").setAttribute("disabled", "");
+                }
+                function enter_homepage() {
+                    window.location.href = "home.html";
+                }
+                function save_element() {
+                    var current_element_id = window.localStorage.getItem("noshroom_current_element_id");
+                    if (current_element_id == -1) {
+                        if (document.getElementById("name").value) {
+                            current_element_id = window.localStorage.getItem("noshroom_element_id");
+                            window.localStorage.setItem("noshroom_element_id", current_element_id + 1);
+                            window.localStorage.setItem("noshroom_current_element_id", current_element_id);
+                        } else {
+                            alert("This element cannot be saved because the name is empty!");
+                            return;
+                        }
+                    }
+                    let data = JSON.parse(JSON.stringify(data_template));
+                    data.name = document.getElementById("name").value;
+                    data.tags = [];
+                    const tags_array = document.getElementById("tags").value.trim().split("#");
+                    for (var i = 1; i < tags_array.length; i += 1) {
+                        tags_array[i] = tags_array[i].trim();
+                        if (tags_array[i]) {
+                            data.tags.push(tags_array[i]);
+                        }
+                    }
+                    data.favorited = document.getElementById("favorited").checked;
+                    data.ingredients = document.getElementById("ingredients").value;
+                    data.preparation = document.getElementById("preparation").value;
+                    data.notes = document.getElementById("notes").value;
+                    window.localStorage.setItem("noshroom_element" + current_element_id, JSON.stringify(data));
+                    construct_view_page();
+                }
+                window.onload = construct_view_page;
+            </script>
+    </head>
+    <body>
+        <h1>Edit Page</h1>
+        <hr>
+        <p>This is the page where the user can edit an element.</p>
+        <button id="homepage" onclick="enter_homepage()">homepage</button>
+        <p>Use the following buttons to delete this element.</p>
+        <button id="delete" onclick="delete_element_attempt()">delete</button>
+        <button disabled id="confirm" onclick="delete_element_confirm()">confirm deletion</button>
+        <button disabled id="cancel" onclick="delete_element_cancel()">cancel deletion</button>
+        <p>The pop-up alert for confirmation is not implemented in this foundation.</p>
+        <hr>
+        <p>The user must press the save button below to save this element.</p>
+        <button id="save" onclick="save_element()">save</button>
+        <p>Name: <input type="text" id="name" size="50"/></p>
+        <p>Currently, this foundation does not check for duplicated names.</p>
+        <p>Tags: <input type="text" id="tags" size="50"/></p>
+        <p>Each tag must start with the # symbol.</p>
+        <p id="tags_preview">Tags preview:</p>
+        <input type="checkbox" id="favorited" onchange="toggle_favorite_element()"/> favorited
+        <p>Ingredients:</p>
+        <textarea id="ingredients" rows="4" cols="50"></textarea>
+        <p>Preparation:</p>
+        <textarea id="preparation" rows="4" cols="50"></textarea>
+        <p>Notes:</p>
+        <textarea id="notes" rows="4" cols="50"></textarea>
+        <br>
+        <br>
+    </body>
+</html>

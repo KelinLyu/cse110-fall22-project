@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <link rel="icon" href="data:,">
+            <script>
+            function construct_view_page() {
+                const current_element_id = window.localStorage.getItem("noshroom_current_element_id");
+                if (current_element_id === null) {
+                    enter_homepage();
+                }
+                let data = JSON.parse(window.localStorage.getItem("noshroom_element" + current_element_id));
+                document.getElementById("name").innerHTML = "Name: " + data.name;
+                document.getElementById("tags").innerHTML = "Tags: ";
+                for (const tag_index in data.tags) {
+                    document.getElementById("tags").innerHTML += "[" + data.tags[tag_index] + "] ";
+                }
+                document.getElementById("favorited").checked = data.favorited;
+                document.getElementById("favorited").addEventListener("change", toggle_favorite_element, false);
+                document.getElementById("favorited").index = current_element_id;
+                document.getElementById("ingredients").innerHTML = "Ingredients: " + data.ingredients;
+                document.getElementById("preparation").innerHTML = "Preparation: " + data.preparation;
+                document.getElementById("notes").innerHTML = "Notes: " + data.notes;
+            }
+            function toggle_favorite_element(event) {
+                const index = event.currentTarget.index;
+                var data = JSON.parse(window.localStorage.getItem("noshroom_element" + index));
+                data.favorited = !data.favorited;
+                window.localStorage.setItem("noshroom_element" + index, JSON.stringify(data));
+            }
+            function delete_element_attempt() {
+                document.getElementById("delete").setAttribute("disabled", "");
+                document.getElementById("confirm").removeAttribute("disabled");
+                document.getElementById("cancel").removeAttribute("disabled");
+            }
+            function delete_element_confirm() {
+                const deletion_element_id = window.localStorage.getItem("noshroom_current_element_id");
+                var index = 0;
+                for (var i = 0; i < localStorage.getItem("noshroom_element_id"); i += 1) {
+                    if (window.localStorage.getItem("noshroom_element" + i) === null) {
+                        continue;
+                    }
+                    if (deletion_element_id == i) {
+                        window.localStorage.removeItem("noshroom_element" + i);
+                        continue;
+                    }
+                    let data = JSON.parse(window.localStorage.getItem("noshroom_element" + i));
+                    window.localStorage.setItem("noshroom_element" + index, JSON.stringify(data));
+                    index += 1;
+                }
+                window.localStorage.setItem("noshroom_element_id", index);
+                enter_homepage();
+            }
+            function delete_element_cancel() {
+                document.getElementById("delete").removeAttribute("disabled");
+                document.getElementById("confirm").setAttribute("disabled", "");
+                document.getElementById("cancel").setAttribute("disabled", "");
+            }
+            function enter_homepage() {
+                window.location.href = "home.html";
+            }
+            window.onload = construct_view_page;
+            </script>
+    </head>
+    <body>
+        <h1>View Page</h1>
+        <hr>
+        <p>This is the page where the user can view an element.</p>
+        <button id="homepage" onclick="enter_homepage()">homepage</button>
+        <button id="edit">edit</button>
+        <p>Use the following buttons to delete this element.</p>
+        <button id="delete" onclick="delete_element_attempt()">delete</button>
+        <button disabled id="confirm" onclick="delete_element_confirm()">confirm deletion</button>
+        <button disabled id="cancel" onclick="delete_element_cancel()">cancel deletion</button>
+        <p>The pop-up alert for confirmation is not implemented in this foundation.</p>
+        <hr>
+        <p id="name">Name:</p>
+        <p id="tags">Tags:</p>
+        <input type="checkbox" id="favorited"/> favorited
+        <p id="ingredients">Ingredients:</p>
+        <p id="preparation">Preparation:</p>
+        <p id="notes">Notes:</p>
+        <br>
+    </body>
+</html>
