@@ -58,6 +58,9 @@
             function enter_homepage() {
                 window.location.href = "home.html";
             }
+            function edit_element() {
+                window.location.href = "edit.html";
+            }
             window.onload = construct_view_page;
             </script>
     </head>
@@ -66,7 +69,7 @@
         <hr>
         <p>This is the page where the user can view an element.</p>
         <button id="homepage" onclick="enter_homepage()">homepage</button>
-        <button id="edit">edit</button>
+        <button id="edit" onclick="edit_element()">edit</button>
         <p>Use the following buttons to delete this element.</p>
         <button id="delete" onclick="delete_element_attempt()">delete</button>
         <button disabled id="confirm" onclick="delete_element_confirm()">confirm deletion</button>

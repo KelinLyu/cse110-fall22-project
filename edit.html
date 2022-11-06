@@ -100,7 +100,7 @@
                         }
                     }
                     let data = JSON.parse(JSON.stringify(data_template));
-                    data.name = document.getElementById("name").value;
+                    data.name = document.getElementById("name").value.trim();
                     data.tags = [];
                     const tags_array = document.getElementById("tags").value.trim().split("#");
                     for (var i = 1; i < tags_array.length; i += 1) {
